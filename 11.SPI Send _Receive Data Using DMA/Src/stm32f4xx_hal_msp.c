@@ -4,8 +4,13 @@
   * Description        : This file provides code for the MSP Initialization 
   *                      and de-Initialization codes.
   ******************************************************************************
+  ** This notice applies to any and all portions of this file
+  * that are not between comment pairs USER CODE BEGIN and
+  * USER CODE END. Other portions of this file, whether 
+  * inserted by the user or by software development tools
+  * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2016 STMicroelectronics
+  * COPYRIGHT(c) 2018 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -36,11 +41,10 @@
 
 extern DMA_HandleTypeDef hdma_spi3_rx;
 
-extern void Error_Handler(void);
+extern void _Error_Handler(char *, int);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
-
 /**
   * Initializes the Global MSP.
   */
@@ -49,6 +53,9 @@ void HAL_MspInit(void)
   /* USER CODE BEGIN MspInit 0 */
 
   /* USER CODE END MspInit 0 */
+
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+  __HAL_RCC_PWR_CLK_ENABLE();
 
   HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
@@ -104,7 +111,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* Peripheral interrupt init */
+    /* SPI2 interrupt Init */
     HAL_NVIC_SetPriority(SPI2_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(SPI2_IRQn);
   /* USER CODE BEGIN SPI2_MspInit 1 */
@@ -139,8 +146,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    /* Peripheral DMA init*/
-  
+    /* SPI3 DMA Init */
+    /* SPI3_RX Init */
     hdma_spi3_rx.Instance = DMA1_Stream0;
     hdma_spi3_rx.Init.Channel = DMA_CHANNEL_0;
     hdma_spi3_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
@@ -153,12 +160,12 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     hdma_spi3_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_spi3_rx) != HAL_OK)
     {
-      Error_Handler();
+      _Error_Handler(__FILE__, __LINE__);
     }
 
     __HAL_LINKDMA(hspi,hdmarx,hdma_spi3_rx);
 
-    /* Peripheral interrupt init */
+    /* SPI3 interrupt Init */
     HAL_NVIC_SetPriority(SPI3_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(SPI3_IRQn);
   /* USER CODE BEGIN SPI3_MspInit 1 */
@@ -188,9 +195,8 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10);
 
-    /* Peripheral interrupt DeInit*/
+    /* SPI2 interrupt DeInit */
     HAL_NVIC_DisableIRQ(SPI2_IRQn);
-
   /* USER CODE BEGIN SPI2_MspDeInit 1 */
 
   /* USER CODE END SPI2_MspDeInit 1 */
@@ -213,12 +219,11 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 
     HAL_GPIO_DeInit(GPIOC, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12);
 
-    /* Peripheral DMA DeInit*/
+    /* SPI3 DMA DeInit */
     HAL_DMA_DeInit(hspi->hdmarx);
 
-    /* Peripheral interrupt DeInit*/
+    /* SPI3 interrupt DeInit */
     HAL_NVIC_DisableIRQ(SPI3_IRQn);
-
   /* USER CODE BEGIN SPI3_MspDeInit 1 */
 
   /* USER CODE END SPI3_MspDeInit 1 */
